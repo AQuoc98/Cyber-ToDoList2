@@ -1,1 +1,5 @@
-# Cyber-ToDoList2
+# General info
+Todolist
+# Technologies
+* ReactJS
+* Redux
