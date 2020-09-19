@@ -1,95 +1,86 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { addTask, editTask } from '../../actions';
-import { Checkbox, CheckboxGroup } from 'react-checkbox-group';
-import uuid from 'uuid'; // universal unique id
+import React, { Component } from "react";
+import { Checkbox, CheckboxGroup } from "react-checkbox-group";
 
 class Modal extends Component {
   constructor(props) {
     super(props);
     this.state = {
       id: "",
-      taskName: "",
-      description: "",
-      priority: -1,
-      memberIDArr: [],
+      name: "",
       labelArr: [],
-      status: ""
-    }
+      priority: "",
+      memberIDArr: [],
+      description: ""
+    };
   }
 
-  onSubmit = (e) => {
-    e.preventDefault();
-    const { checkAddNewTask } = this.props;
-
-    let task
-    if (checkAddNewTask) {
-      task = {
-        ...this.state,  // spread operator
-        id: uuid(),
-        name: this.state.taskName,
-        priority: parseInt(this.state.priority, 10),
-        status: 1
-      }
-      this.props.addTask(task);
-    } else {
-      task = {
-        ...this.state,  // spread operator
-        name: this.state.taskName,
-        priority: parseInt(this.state.priority, 10),
-      }
-      this.props.editTask(task);
-    }
-  }
-
-  onChange = (e) => {
+  onChange = event => {
     this.setState({
-      [e.target.name]: e.target.value
-      // computed ES6
-    })
-  }
-
-  memberArrChange = (memberIDArr) => {
-    this.setState({
-      memberIDArr: memberIDArr
+      [event.target.name]: event.target.value
     });
-  }
+    console.log(event.target.value);
+  };
 
-  labelArrChange = (labelArr) => {
+  onSubmit = event => {
+    event.preventDefault(); // Chống reload trang
+    this.props.addNewTask(this.state);
+    this.props.onEditTask(this.state);
+  };
+
+  memberChanged = newMember => {
     this.setState({
-      labelArr
+      memberIDArr: newMember
     });
-  }
+  };
 
-  componentWillReceiveProps = (nextProps) => {
-    const { taskEditing } = nextProps
+  labelChanged = newLabel => {
     this.setState({
-      id: taskEditing.id,
-      taskName: taskEditing.name,
-      description: taskEditing.description,
-      priority: taskEditing.priority,
-      memberIDArr: taskEditing.memberIDArr,
-      labelArr: taskEditing.labelArr,
-      status: taskEditing.status
-    })
-  }
+      labelArr: newLabel
+    });
+  };
 
-  // React cao hon: getDerivedStateFromProps
+  componentWillReceiveProps = nextProps => {
+    if (nextProps && nextProps.isAddNewTask) {
+      this.clearForm();
+    }
+    if (nextProps && nextProps.taskEditing && !nextProps.isAddNewTask) {
+      this.setState({
+        id: nextProps.taskEditing.id,
+        name: nextProps.taskEditing.name,
+        labelArr: nextProps.taskEditing.labelArr,
+        description: nextProps.taskEditing.description,
+        priority: nextProps.taskEditing.priority,
+        memberIDArr: nextProps.taskEditing.memberIDArr
+      });
+    }
+  };
+
+  clearForm = () => {
+    this.setState({
+      id: "",
+      name: "",
+      labelArr: [],
+      priority: "",
+      memberIDArr: [],
+      description: ""
+    });
+  };
 
   render() {
-    const { checkAddNewTask } = this.props;
     return (
       <div className="modal fade" id="modalTask">
         <div className="modal-dialog modal-lg">
-          <form onSubmit={this.onSubmit} >
-            <div className="modal-content">
-              {/* Modal Header */}
-              <div className="modal-header">
-                <h4 className="modal-title">
-                  {checkAddNewTask ? "THÊM TASK" : "SỬA TASK"}
-                </h4>
-                <button type="button" className="close" data-dismiss="modal">×</button>
-              </div>
+          <div className="modal-content">
+            {/* Modal Header */}
+            <div className="modal-header">
+              <h4 className="modal-title">
+                {this.props.isAddNewTask ? "Thêm Task" : "Sửa Task"}
+              </h4>
+              <button type="button" className="close" data-dismiss="modal">
+                ×
+              </button>
+            </div>
+            <form onSubmit={this.onSubmit}>
               {/* Modal body */}
               <div className="modal-body">
                 <div className="form-group">
@@ -97,18 +88,18 @@ class Modal extends Component {
                   <input
                     type="text"
                     className="form-control"
-                    id="taskName"
-                    name="taskName"
+                    name="name"
                     onChange={this.onChange}
-                    value={this.state.taskName}
+                    value={this.state.name}
                   />
+                  {/* Name trước là tên của thuộc tính name, name sau là tên của thằng state */}
                 </div>
                 <div className="form-group">
                   <label htmlFor="description">Mô tả:</label>
                   <textarea
                     className="form-control"
                     rows={2}
-                    id="description"
+                    id="description" // có htmlFor nên k xóa cái id = "description" được
                     name="description"
                     onChange={this.onChange}
                     value={this.state.description}
@@ -129,72 +120,72 @@ class Modal extends Component {
                     <option value={1}>Cao</option>
                   </select>
                 </div>
-                <label>Người thực hiện:</label>
-                <br />
+
                 <CheckboxGroup
                   checkboxDepth={2} // This is needed to optimize the checkbox group
                   name="memberIDArr"
                   value={this.state.memberIDArr}
-                  onChange={this.memberArrChange}>
-
-                  <label><Checkbox value="user_1" />User 1</label>
-                  <label><Checkbox value="user_2" />User 2</label>
-                  <label><Checkbox value="user_3" />User 3</label>
-                  <label><Checkbox value="user_4" />User 4</label>
+                  onChange={this.memberChanged}
+                >
+                  <label>
+                    <Checkbox value="user_2" /> Phó Nghĩa Văn
+                  </label>
+                  <label>
+                    <Checkbox value="user_3" /> Nguyễn Tiến Minh Tuấn
+                  </label>
+                  <label>
+                    <Checkbox value="user_4" /> Đặng Trung Hiếu
+                  </label>
+                  <label>
+                    <Checkbox value="user_5" /> Trương Tấn Khải
+                  </label>
                 </CheckboxGroup>
 
-                <br /><br />
-                <label >Nhãn:</label>
                 <br />
+
                 <CheckboxGroup
                   checkboxDepth={2} // This is needed to optimize the checkbox group
                   name="labelArr"
                   value={this.state.labelArr}
-                  onChange={this.labelArrChange}>
-
-                  <Checkbox value="Frontend" />Frontend
-                  <Checkbox value="Backend" />Backend
-                  <Checkbox value="API" />API
-                  <Checkbox value="Issue" />Issue
+                  onChange={this.labelChanged}
+                >
+                  <label>
+                    <Checkbox value="Frontend" /> Frontend
+                  </label>
+                  <label>
+                    <Checkbox value="Backend" /> Backend
+                  </label>
+                  <label>
+                    <Checkbox value="API" /> API
+                  </label>
+                  <label>
+                    <Checkbox value="Issue" /> Issue
+                  </label>
                 </CheckboxGroup>
               </div>
               {/* Modal footer */}
               <div className="modal-footer">
-                <button type="submit"
-                  className={`btn ${checkAddNewTask ? "btn-info" : "btn-warning"}`}
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  // data-dismiss="modal"
                 >
-                  {checkAddNewTask ? "THÊM TASK" : "SỬA TASK"}
+                  {this.props.isAddNewTask ? "Thêm Task" : "Sửa Task"}
                 </button>
-                <button type="button" className="btn btn-danger" data-dismiss="modal">Close</button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  data-dismiss="modal"
+                >
+                  Đóng
+                </button>
               </div>
-            </div>
-          </form>
-
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 }
 
-// mapStateToProps
-// mapDispatchToProps
-
-const mapStateToProps = (state) => {
-  return {
-    checkAddNewTask: state.checkAddNewTask,
-    taskEditing: state.taskEditing,
-  }
-}
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    addTask: (task) => {
-      dispatch(addTask(task))
-    },
-    editTask: (task) => {
-      dispatch(editTask(task))
-    }
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Modal);
+export default Modal;
