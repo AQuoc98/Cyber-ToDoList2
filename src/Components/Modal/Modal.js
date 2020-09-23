@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Checkbox, CheckboxGroup } from "react-checkbox-group";
+import { connect } from "react-redux";
+import * as actions from "../../Actions/index";
 
 class Modal extends Component {
   constructor(props) {
@@ -10,60 +12,69 @@ class Modal extends Component {
       labelArr: [],
       priority: "",
       memberIDArr: [],
-      description: ""
+      status: 1,
+      description: "",
     };
   }
 
-  onChange = event => {
+  onChange = (event) => {
     this.setState({
-      [event.target.name]: event.target.value
-    });
-    console.log(event.target.value);
-  };
-
-  onSubmit = event => {
-    event.preventDefault(); // Chống reload trang
-    this.props.addNewTask(this.state);
-    this.props.onEditTask(this.state);
-  };
-
-  memberChanged = newMember => {
-    this.setState({
-      memberIDArr: newMember
+      [event.target.name]: event.target.value,
     });
   };
 
-  labelChanged = newLabel => {
-    this.setState({
-      labelArr: newLabel
-    });
-  };
-
-  componentWillReceiveProps = nextProps => {
-    if (nextProps && nextProps.isAddNewTask) {
-      this.clearForm();
+  onSubmit = (event) => {
+    event.preventDefault();
+    if (this.props.isAddNewTask) {
+      this.props.addTask(this.state);
+    } else {
+      this.props.updateTask(this.state);
     }
-    if (nextProps && nextProps.taskEditing && !nextProps.isAddNewTask) {
-      this.setState({
-        id: nextProps.taskEditing.id,
-        name: nextProps.taskEditing.name,
-        labelArr: nextProps.taskEditing.labelArr,
-        description: nextProps.taskEditing.description,
-        priority: nextProps.taskEditing.priority,
-        memberIDArr: nextProps.taskEditing.memberIDArr
-      });
-    }
+  };
+
+  memberChanged = (newMember) => {
+    this.setState({
+      memberIDArr: newMember,
+    });
+  };
+
+  labelChanged = (newLabel) => {
+    this.setState({
+      labelArr: newLabel,
+    });
   };
 
   clearForm = () => {
     this.setState({
-      id: "",
       name: "",
       labelArr: [],
       priority: "",
       memberIDArr: [],
-      description: ""
+      description: "",
     });
+  };
+
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps && nextProps.taskEditing) {
+      let {
+        id,
+        name,
+        labelArr,
+        priority,
+        memberIDArr,
+        status,
+        description,
+      } = nextProps.taskEditing;
+      this.setState({
+        id,
+        name,
+        labelArr,
+        priority,
+        memberIDArr,
+        status,
+        description,
+      });
+    }
   };
 
   render() {
@@ -165,11 +176,7 @@ class Modal extends Component {
               </div>
               {/* Modal footer */}
               <div className="modal-footer">
-                <button
-                  type="submit"
-                  className="btn btn-success"
-                  // data-dismiss="modal"
-                >
+                <button type="submit" className="btn btn-success">
                   {this.props.isAddNewTask ? "Thêm Task" : "Sửa Task"}
                 </button>
                 <button
@@ -188,4 +195,18 @@ class Modal extends Component {
   }
 }
 
-export default Modal;
+const mapStateToProps = (state) => {
+  return {
+    taskEditing: state.taskEditing,
+    isAddNewTask: state.isAddNewTask,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addTask: (newTask) => dispatch(actions.addTask(newTask)),
+    updateTask: (task) => dispatch(actions.updateTask(task)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Modal);

@@ -1,121 +1,42 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 
 // import components
-import FilterString from "../Controls/FilterString";
 import TaskItem from "./TaskItem";
-import Thead from "./Thead";
+import FilterString from "../Controls/FilterString";
 
 class TaskList extends Component {
   render() {
-    let {
-      tasks,
-      filterType,
-      filterProgress,
-      filterLabel,
-      filterPriority,
-      sortType
-    } = this.props;
-    
+    let { tasks } = this.props;
+
     let filterTasks = [];
 
-    switch (filterType) {
-      case "filterProgress":
-        if (filterProgress === -1) {
+    switch (this.props.filter.filterType) {
+      case "Status":
+        if (parseInt(this.props.filter.filterValue, 10) === -1) {
           filterTasks = tasks;
         } else {
           for (let task of tasks) {
-            if (parseInt(task.status, 10) === filterProgress) {
+            if (parseInt(task.status, 10) === this.props.filter.filterValue) {
               filterTasks = [...filterTasks, task];
             }
           }
         }
         break;
 
-      case "filterLabel":
-        if (filterLabel === -1) {
-          filterTasks = tasks;
-        } else {
-          // console.log(filterLabel);
-          for (let task of tasks) {
-            for (let label of task.labelArr) {
-              if (label === filterLabel) {
-                filterTasks = [...filterTasks, task];
-              }
-            }
-          }
-        }
-        break;
-
-      case "filterPriority":
-        
-        if (parseInt(filterPriority, 10) === -1) {
-          console.log(filterPriority);
-          
-          filterTasks = [...tasks];
-          
-        } else {
-          
-          for (let task of tasks) {
-            if (task.priority === parseInt(filterPriority, 10)) {
-              filterTasks = [...filterTasks, task];
-            }
-          }
-        }
-        break;
-
-      case "filterSearch":
-        filterTasks = tasks.filter(task => {
-          return (
-            task.name
-              .toLowerCase()
-              .indexOf(this.props.filterSearch.toLowerCase()) !== -1
-          );
-        });
-        break;
-
-      case "sort":
+      case "":
         filterTasks = tasks;
-        if (sortType === "asc") {
-          filterTasks.sort((a, b) => {
-            let x = a.name.toLowerCase();
-            let y = b.name.toLowerCase();
-            if (x < y) {
-              return -1;
-            }
-            if (x > y) {
-              return 1;
-            }
-            return 0;
-          });
-        }
-        if (sortType === "desc") {
-          filterTasks.sort((a, b) => {
-            let x = a.name.toLowerCase();
-            let y = b.name.toLowerCase();
-            if (x > y) {
-              return -1;
-            }
-            if (x < y) {
-              return 1;
-            }
-            return 0;
-          });
-        }
         break;
-
       default:
-        filterTasks = tasks;
         break;
     }
 
-    let taskItemElm = filterTasks.map((item, index) => {
-      return ( 
-      <TaskItem
-          key={index} 
-          item={item}
+    const taskItemElm = filterTasks.map((task, index) => {
+      return (
+        <TaskItem
+          key={index} // key không phải props =
+          task={task}
           index={index}
-          editTask={this.props.editTask}
-          changeProgress={this.props.changeProgress}
         />
       );
     });
@@ -130,15 +51,23 @@ class TaskList extends Component {
             </div>
 
             <div className="col-md-6">
-              <FilterString
-                changeFilterSearch={this.props.changeFilterSearch}
-              />
+              <FilterString />
             </div>
           </div>
         </div>
         <div className="px-3">
           <table className="table table-hover">
-            <Thead />
+            <thead>
+              <tr>
+                <th className="text-center">STT</th>
+                <th className="text-center">Công việc</th>
+                <th className="text-center">Nhãn</th>
+                <th className="text-center">Độ ưu tiên</th>
+                <th className="text-center">Người thực hiện</th>
+                <th className="text-center">Xử lý</th>
+                <th className="text-center">Tình trạng</th>
+              </tr>
+            </thead>
             <tbody>{taskItemElm}</tbody>
           </table>
         </div>
@@ -147,4 +76,11 @@ class TaskList extends Component {
   }
 }
 
-export default TaskList;
+const mapStateToProps = (state) => {
+  return {
+    tasks: state.tasks,
+    filter: state.filter,
+  };
+};
+
+export default connect(mapStateToProps, null)(TaskList);

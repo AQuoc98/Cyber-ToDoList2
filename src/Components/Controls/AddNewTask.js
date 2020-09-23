@@ -1,9 +1,13 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import * as actions from "../../Actions/index";
 
 class AddNewTask extends Component {
   handleAddNewTask = () => {
-    this.props.clearBeforeAddNewTask();
-  }
+    this.props.convertIsAddNewTask();
+    this.props.clearForm();
+  };
+
   render() {
     return (
       <button
@@ -20,4 +24,11 @@ class AddNewTask extends Component {
   }
 }
 
-export default AddNewTask;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    convertIsAddNewTask: () => dispatch(actions.convertIsAddNewTask()),
+    clearForm: () => dispatch(actions.clearForm()),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(AddNewTask);

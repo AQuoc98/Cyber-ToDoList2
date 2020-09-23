@@ -1,22 +1,27 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import * as actions from "../../Actions/index";
 
 class InitializeTask extends Component {
-
-  InitializeTask = () => {
-    this.props.generateData();
+  render() {
+    let { initializeTask } = this.props;
+    return (
+      <button
+        type="button"
+        className="btn btn--initializeTask"
+        onClick={initializeTask}
+      >
+        <i className="fa fa-pencil-square-o" />
+        Lấy Task từ LocalStorage
+      </button>
+    );
   }
-    render() {
-        return (
-            <button
-            type="button"
-            className="btn btn--initializeTask"
-            onClick={this.InitializeTask}
-          >
-            <i className="fa fa-pencil-square-o" />
-            Lấy Task từ LocalStorage
-          </button>
-        );
-    }
 }
 
-export default InitializeTask;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    initializeTask: () => dispatch(actions.initializeTasks()),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(InitializeTask);

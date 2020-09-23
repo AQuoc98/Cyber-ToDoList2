@@ -1,11 +1,8 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import * as actions from "../../Actions/index";
 
 class FilterProgress extends Component {
-  
-  hanldeFilterProgress = filterProgress => {
-    this.props.changeFilterProgress(filterProgress);
-  };
-
   render() {
     return (
       <div className="filter filter--progress">
@@ -13,32 +10,34 @@ class FilterProgress extends Component {
           Lọc
           <li
             className="py-1 display-5 lead"
-            onClick={this.hanldeFilterProgress.bind(this, -1)}
+            onClick={this.props.filter.bind(this, "Status", -1)}
           >
             Tất cả
           </li>
           <li
             className="py-1 display-5 lead"
-            onClick={this.hanldeFilterProgress.bind(this, 1)}
+            onClick={this.props.filter.bind(this, "Status", 1)}
           >
-            <i className="fa fa fa-hourglass-start mr-2" /> Đang tiến hành
+            <i className="fa fa fa-hourglass-start mr-2" />
+            Bắt đầu
           </li>
           <li
             className="py-1 display-5 lead"
-            onClick={this.hanldeFilterProgress.bind(this, 2)}
+            onClick={this.props.filter.bind(this, "Status", 2)}
           >
-            <i className="fa fa-anchor" /> Chưa bắt đầu
+            <i className="fa fa-anchor" />
+            Tạm ngưng
           </li>
           <li
             className="py-1 display-5 lead"
-            onClick={this.hanldeFilterProgress.bind(this, 3)}
+            onClick={this.props.filter.bind(this, "Status", 3)}
           >
             <i className="fa fa-check-square-o mr-2" />
             Hoàn thành
           </li>
           <li
             className="py-1 display-5 lead"
-            onClick={this.hanldeFilterProgress.bind(this, 4)}
+            onClick={this.props.filter.bind(this, "Status", 4)}
           >
             <i className="fa fa-trash-o mr-2" />
             Hủy bỏ
@@ -49,4 +48,11 @@ class FilterProgress extends Component {
   }
 }
 
-export default FilterProgress;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    filter: (filterType, filterValue) =>
+      dispatch(actions.filter(filterType, filterValue)),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(FilterProgress);
